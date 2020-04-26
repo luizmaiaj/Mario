@@ -38,10 +38,9 @@ function LevelMaker.generate(width, height)
         end
 
         -- chance to just be emptiness
-        if x > 1 and math.random(7) == 1 then -- x > 1 only chasms after 1 block
+        if x > 1 and math.random(7) == 1 then -- only chasms after 1 block (x > 1)
             for y = 7, height do
-                table.insert(tiles[y],
-                    Tile(x, y, tileID, nil, tileset, topperset))
+                table.insert(tiles[y], Tile(x, y, tileID, nil, tileset, topperset))
             end
         else
             tileID = TILE_ID_GROUND
@@ -49,8 +48,7 @@ function LevelMaker.generate(width, height)
             local blockHeight = 4
 
             for y = 7, height do
-                table.insert(tiles[y],
-                    Tile(x, y, tileID, y == 7 and topper or nil, tileset, topperset))
+                table.insert(tiles[y], Tile(x, y, tileID, y == 7 and topper or nil, tileset, topperset))
             end
 
             -- chance to generate a pillar
@@ -94,7 +92,7 @@ function LevelMaker.generate(width, height)
             end
 
             -- chance to spawn a block
-            if math.random(10) == 1 then
+            if math.random(9) == 1 then -- reduced from 10 to 9
                 table.insert(objects,
 
                     -- jump block
@@ -136,13 +134,12 @@ function LevelMaker.generate(width, height)
                                         onConsume = function(player, object)
                                             gSounds['pickup']:play()
                                             player.score = player.score + 100
+                                            return true
                                         end
                                     }
                                     
                                     -- make the gem move up from the block and play a sound
-                                    Timer.tween(0.1, {
-                                        [gem] = {y = (blockHeight - 2) * TILE_SIZE}
-                                    })
+                                    Timer.tween(0.1, { [gem] = {y = (blockHeight - 2) * TILE_SIZE} })
                                     gSounds['powerup-reveal']:play()
 
                                     table.insert(objects, gem)
