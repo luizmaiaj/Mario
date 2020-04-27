@@ -10,10 +10,15 @@
 
 LevelMaker = Class{}
 
-function LevelMaker.generate(width, height)
-    local tiles = {}
-    local entities = {}
-    local objects = {}
+function LevelMaker:init()
+    self.level = 1
+
+    self.tiles = {}
+    self.entities = {}
+    self.objects = {}
+end
+
+function LevelMaker:generate(width, height)
 
     local tileID = TILE_ID_GROUND
     
@@ -24,7 +29,7 @@ function LevelMaker.generate(width, height)
 
     -- insert blank tables into tiles for later access
     for x = 1, height do
-        table.insert(tiles, {})
+        table.insert(self.tiles, {})
     end
 
     -- column by column generation instead of row; sometimes better for platformers
@@ -33,14 +38,14 @@ function LevelMaker.generate(width, height)
         
         -- lay out the empty space
         for y = 1, 6 do
-            table.insert(tiles[y],
+            table.insert(self.tiles[y],
                 Tile(x, y, tileID, nil, tileset, topperset))
         end
 
         -- chance to just be emptiness
-        if x > 1 and math.random(7) == 1 then -- only chasms after 1 block (x > 1)
+        if x > 3 and math.random(7) == 1 and x < (width - 3) then -- only chasms after 1 block (x > 1) and none near the end
             for y = 7, height do
-                table.insert(tiles[y], Tile(x, y, tileID, nil, tileset, topperset))
+                table.insert(self.tiles[y], Tile(x, y, tileID, nil, tileset, topperset))
             end
         else
             tileID = TILE_ID_GROUND
@@ -48,16 +53,16 @@ function LevelMaker.generate(width, height)
             local blockHeight = 4
 
             for y = 7, height do
-                table.insert(tiles[y], Tile(x, y, tileID, y == 7 and topper or nil, tileset, topperset))
+                table.insert(self.tiles[y], Tile(x, y, tileID, y == 7 and topper or nil, tileset, topperset))
             end
 
             -- chance to generate a pillar
-            if math.random(8) == 1 then
+            if math.random(8) == 1 and x < (width - 3) then
                 blockHeight = 2
                 
                 -- chance to generate bush on pillar
                 if math.random(8) == 1 then
-                    table.insert(objects,
+                    table.insert(self.objects,
                         GameObject {
                             texture = 'bushes',
                             x = (x - 1) * TILE_SIZE,
@@ -72,13 +77,13 @@ function LevelMaker.generate(width, height)
                 end
                 
                 -- pillar tiles
-                tiles[5][x] = Tile(x, 5, tileID, topper, tileset, topperset)
-                tiles[6][x] = Tile(x, 6, tileID, nil, tileset, topperset)
-                tiles[7][x].topper = nil
+                self.tiles[5][x] = Tile(x, 5, tileID, topper, tileset, topperset)
+                self.tiles[6][x] = Tile(x, 6, tileID, nil, tileset, topperset)
+                self.tiles[7][x].topper = nil
             
             -- chance to generate bushes
-            elseif math.random(8) == 1 then
-                table.insert(objects,
+            elseif math.random(8) == 1 and x < (width - 3) then
+                table.insert(self.objects,
                     GameObject {
                         texture = 'bushes',
                         x = (x - 1) * TILE_SIZE,
@@ -92,8 +97,8 @@ function LevelMaker.generate(width, height)
             end
 
             -- chance to spawn a block
-            if math.random(9) == 1 then -- reduced from 10 to 9
-                table.insert(objects,
+            if math.random(9) == 1 and x < (width - 3) then -- reduced from 10 to 9
+                table.insert(self.objects,
 
                     -- jump block
                     GameObject {
@@ -131,7 +136,7 @@ function LevelMaker.generate(width, height)
                                         solid = false,
 
                                         -- gem has its own function to add to the player's score
-                                        onConsume = function(player, object)
+                                        onConsume = function(player)
                                             gSounds['pickup']:play()
                                             player.score = player.score + 100
                                             return true
@@ -142,7 +147,7 @@ function LevelMaker.generate(width, height)
                                     Timer.tween(0.1, { [gem] = {y = (blockHeight - 2) * TILE_SIZE} })
                                     gSounds['powerup-reveal']:play()
 
-                                    table.insert(objects, gem)
+                                    table.insert(self.objects, gem)
                                 end
 
                                 obj.hit = true
@@ -157,7 +162,7 @@ function LevelMaker.generate(width, height)
     end
 
     local map = TileMap(width, height)
-    map.tiles = tiles
+    map.tiles = self.tiles
     
-    return GameLevel(entities, objects, map)
+    return GameLevel(self.entities, self.objects, map, width)
 end

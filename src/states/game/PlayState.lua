@@ -7,16 +7,18 @@
 
 PlayState = Class{__includes = BaseState}
 
-function PlayState:init()
-    self.camX = 0
-    self.camY = 0
-    self.level = LevelMaker.generate(100, 10)
-    self.tileMap = self.level.tileMap
-    self.background = math.random(3)
-    self.backgroundX = 0
+function PlayState:enter(params)
+    self.levelnumber = params.level
+    self.levelwidth = params.width + (self.levelnumber * 10)
 
-    self.gravityOn = true
-    self.gravityAmount = 6
+    print('level width ' .. self.levelwidth)
+
+    self.score = params.score
+
+    local levelMaker = LevelMaker()
+
+    self.level = levelMaker:generate(self.levelwidth, 10)
+    self.tileMap = self.level.tileMap
 
     self.player = Player({
         x = 0, y = 0,
@@ -29,7 +31,9 @@ function PlayState:init()
             ['falling'] = function() return PlayerFallingState(self.player, self.gravityAmount) end
         },
         map = self.tileMap,
-        level = self.level
+        level = self.level,
+        levelnumber = self.levelnumber,
+        score = self.score
     })
 
     self.level:key()
@@ -37,6 +41,16 @@ function PlayState:init()
     self:spawnEnemies()
 
     self.player:changeState('falling')
+end
+
+function PlayState:init()
+    self.camX = 0
+    self.camY = 0
+    self.background = math.random(3)
+    self.backgroundX = 0
+
+    self.gravityOn = true
+    self.gravityAmount = 6
 end
 
 function PlayState:update(dt)
@@ -85,7 +99,7 @@ function PlayState:render()
 
     -- render if player has key
     if self.player.key then
-        love.graphics.draw(gTextures['keys-locks'], gFrames['keys-locks'][1], 50, 0)
+        love.graphics.draw(gTextures['keys-locks'], gFrames['keys-locks'][self.player.level.keyframe], 75, 3)
     end
 end
 
@@ -103,7 +117,7 @@ end
 ]]
 function PlayState:spawnEnemies()
     -- spawn snails in the level
-    for x = 1, self.tileMap.width do
+    for x = 1, (self.tileMap.width - 5) do
 
         -- flag for whether there's ground on this column of the level
         local groundFound = false
@@ -130,9 +144,7 @@ function PlayState:spawnEnemies()
                                 ['chasing'] = function() return SnailChasingState(self.tileMap, self.player, snail) end
                             }
                         }
-                        snail:changeState('idle', {
-                            wait = math.random(5)
-                        })
+                        snail:changeState('idle', { wait = math.random(5) })
 
                         table.insert(self.level.entities, snail)
                     end
