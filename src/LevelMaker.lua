@@ -18,14 +18,16 @@ function LevelMaker:init()
     self.objects = {}
     self.tileset = math.random(20)
     self.topperset = math.random(20)
+    self.blockheight = 0
+    self.lastblockheight = 0
+    self.lastblock = false
+    self.gradient = 0
 end
 
 function LevelMaker:generate(width, height)
 
     self.width = width
     self.height = height
-    self.blockheight = 0
-    self.lastblockheight = 0
 
     -- insert blank tables into tiles for later access
     for y = 1, height do
@@ -38,8 +40,10 @@ function LevelMaker:generate(width, height)
 
         self:floor(x, middle)
 
-        -- chance to spawn a block
-        if math.random(8) == 1 and middle and self.blockheight < self.height then -- reduced from 10 to 9
+        self.lastblock = false
+        print(self.gradient)
+        if math.random(6) == 1 and middle and self.blockheight < self.height and self.gradient > -1 then -- reduced from 10 to 6
+            self.lastblock = true
             self:block(x)
         end
     end
@@ -69,9 +73,14 @@ end
 function LevelMaker:floor(x, middle)
 
     self.blockheight = middle == true and math.random(5, self.height) or 7
+    self.gradient = self.lastblockheight - self.blockheight
 
-    if (self.lastblockheight - self.blockheight) > 3 then -- avoid high walls
+    if self.gradient > 3 then -- avoid high walls
         self.blockheight = self.blockheight + 1
+    end
+    
+    if self.lastblock and self.blockheight == (self.lastblockheight + 1) then -- avoid block in middle of stair
+        self.blockheight = self.blockheight - 1
     end
 
     self.lastblockheight = self.blockheight
