@@ -113,7 +113,7 @@ function LevelMaker:block(x)
                 if not obj.hit then
 
                     -- chance to spawn gem, not guaranteed
-                    if math.random(5) == 1 then
+                    if math.random(3) == 1 then
                         self:gem(x)
                     end
 
