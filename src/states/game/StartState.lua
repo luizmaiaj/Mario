@@ -12,7 +12,7 @@ StartState = Class{__includes = BaseState}
 
 function StartState:init()
     local level = LevelMaker()
-    self.map = level:generate(20, 10)
+    self.map = level:generate(30, 10)
     self.background = math.random(3)
 end
 

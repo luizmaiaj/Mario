@@ -28,11 +28,7 @@ function love.load()
 
     math.randomseed(os.time())
     
-    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
-        fullscreen = false,
-        vsync = true,
-        resizable = true
-    })
+    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, { fullscreen = false, vsync = true, resizable = true })
 
     gStateMachine = StateMachine {
         ['start'] = function() return StartState() end,

@@ -35,6 +35,8 @@ end
 function TileMap:render()
     for y = 1, self.height do
         for x = 1, self.width do
+            --print('TileMap:render y: ' .. y .. ', x: ' .. x)
+
             self.tiles[y][x]:render()
         end
     end
