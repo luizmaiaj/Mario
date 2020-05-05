@@ -29,6 +29,9 @@ function LevelMaker:generate(width, height)
     self.width = width
     self.height = height
 
+    print('--------------------------------------------------')
+    print('LevelMaker:generate width: ' .. width .. ' height: ' .. height)
+
     -- insert blank tables into tiles for later access
     for y = 1, height do
         table.insert(self.tiles, {})
@@ -41,7 +44,6 @@ function LevelMaker:generate(width, height)
         self:floor(x, middle)
 
         self.lastblock = false
-        print(self.gradient)
         if math.random(6) == 1 and middle and self.blockheight < self.height and self.gradient > -1 then -- reduced from 10 to 6
             self.lastblock = true
             self:block(x)
@@ -51,7 +53,7 @@ function LevelMaker:generate(width, height)
     local map = TileMap(width, height)
     map.tiles = self.tiles
     
-    return GameLevel(self.entities, self.objects, map, width)
+    return GameLevel(self.entities, self.objects, map, self.width, self.height)
 end
 
 function LevelMaker:bush(x)
@@ -72,11 +74,11 @@ end
 
 function LevelMaker:floor(x, middle)
 
-    self.blockheight = middle == true and math.random(5, self.height) or 7
+    self.blockheight = middle == true and math.random(4, self.height) or math.random(4, self.height - 1)
     self.gradient = self.lastblockheight - self.blockheight
 
-    if self.gradient > 3 then -- avoid high walls
-        self.blockheight = self.blockheight + 1
+    if math.abs(self.gradient) > 3 and self.blockheight ~= self.height then -- avoid high walls
+        self.blockheight = self.lastblockheight + (self.gradient > 0 and -3 or 3)
     end
     
     if self.lastblock and self.blockheight == (self.lastblockheight + 1) then -- avoid block in middle of stair
@@ -100,14 +102,16 @@ function LevelMaker:floor(x, middle)
 end
 
 function LevelMaker:block(x)
+
+    print('LevelMaker:block: ' .. (self.blockheight - 4) * TILE_SIZE)
     table.insert(self.objects,
         -- jump block
         GameObject {
             texture = 'jump-blocks',
             x = (x - 1) * TILE_SIZE,
             y = (self.blockheight - 4) * TILE_SIZE,
-            width = 16,
-            height = 16,
+            width = TILE_SIZE,
+            height = TILE_SIZE,
 
             -- make it a random variant
             frame = math.random(#JUMP_BLOCKS),
@@ -136,13 +140,13 @@ function LevelMaker:block(x)
 end
 
 function LevelMaker:gem(x)
-    -- maintain reference so we can set it to nil
+    print('LevelMaker:gem: ' .. (self.blockheight - 4) * TILE_SIZE)
     local gem = GameObject {
         texture = 'gems',
         x = (x - 1) * TILE_SIZE,
-        y = (self.blockheight - 4) * TILE_SIZE - 4,
-        width = 16,
-        height = 16,
+        y = (self.blockheight - 4) * TILE_SIZE,
+        width = TILE_SIZE,
+        height = TILE_SIZE,
         frame = math.random(#GEMS),
         collidable = true,
         consumable = true,
@@ -157,7 +161,7 @@ function LevelMaker:gem(x)
     }
     
     -- make the gem move up from the block and play a sound
-    Timer.tween(0.1, { [gem] = {y = (self.blockheight - 5) * TILE_SIZE} })
+    Timer.tween(0.1, { [gem] = {y = gem.y - TILE_SIZE} })
     gSounds['powerup-reveal']:play()
 
     table.insert(self.objects, gem)

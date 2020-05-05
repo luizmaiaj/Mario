@@ -12,20 +12,34 @@ StartState = Class{__includes = BaseState}
 
 function StartState:init()
     local level = LevelMaker()
-    self.map = level:generate(30, 10)
+    self.map = level:generate(math.floor(VIRTUAL_WIDTH/TILE_SIZE), math.floor(VIRTUAL_HEIGHT/TILE_SIZE) + 1)
     self.background = math.random(3)
+
+    print('StartState:init width: ' .. self.map.width .. ' height: ' .. self.map.height)
 end
 
 function StartState:update(dt)
     if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
-        gStateMachine:change('play', {width = 20, level = 0, score = 0})
+        print('StartState:update width: ' .. self.map.width .. ' height: ' .. self.map.height)
+        gStateMachine:change('play', {width = self.map.width, height = self.map.height, level = 0, score = 0})
     end
 end
 
 function StartState:render()
     love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 0, 0)
-    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 0,
-        gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 0, gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 0, gTextures['backgrounds']:getHeight(), 0, 1, -1)
+    
+    --bg to the right
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 256, 0)
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 256, gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 256, gTextures['backgrounds']:getHeight(), 0, 1, -1)
+    
+    --bg to the right 2
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 512, 0)
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 512, gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], 512, gTextures['backgrounds']:getHeight(), 0, 1, -1)
+
     self.map:render()
 
     love.graphics.setFont(gFonts['title'])

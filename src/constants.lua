@@ -15,8 +15,10 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
 -- size we're trying to emulate with push
-VIRTUAL_WIDTH = 256
-VIRTUAL_HEIGHT = 144
+--VIRTUAL_WIDTH = 256
+VIRTUAL_WIDTH = 512
+--VIRTUAL_HEIGHT = 144
+VIRTUAL_HEIGHT = 288
 
 -- global standard tile size
 TILE_SIZE = 16

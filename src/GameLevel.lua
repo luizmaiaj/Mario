@@ -10,11 +10,12 @@
 
 GameLevel = Class{}
 
-function GameLevel:init(entities, objects, tilemap, width)
+function GameLevel:init(entities, objects, tilemap, width, height)
     self.entities = entities
     self.objects = objects
     self.tileMap = tilemap
     self.width = width
+    self.height = height
     self.keyframe = math.random(1, 4)
 end
 
@@ -81,6 +82,15 @@ function GameLevel:key()
     local sortframes = 7 + (math.random(0, 3) * 9)
     local flagframes = {sortframes, sortframes + 1}
 
+    --find floor level to put pole
+    local floorheight = 0
+    for y = 1, self.height do
+        if self.tileMap.tiles[y][self.width - 1].id == TILE_ID_GROUND then
+            floorheight = (self.tileMap.tiles[y][self.width - 1].y - 4) * TILE_SIZE
+            break
+        end
+    end
+
     self.objects[lock].texture = 'keys-locks'
     self.objects[lock].frame = self.keyframe + 4
     self.objects[lock].collidable = false
@@ -92,9 +102,9 @@ function GameLevel:key()
             local pole = GameObject {
                 texture = 'poles',
                 x = TILE_SIZE * (self.width - 2),
-                y = TILE_SIZE * 3,
-                width = 16,
-                height = 48,
+                y = floorheight,
+                width = TILE_SIZE,
+                height = floorheight,
                 frame = math.random(6),
                 collidable = false,
                 consumable = true,
@@ -102,7 +112,7 @@ function GameLevel:key()
                 onConsume = function(player) -- when the player reaches the pole
                     gSounds['pickup']:play()
                     player.score = player.score + 1000
-                    gStateMachine:change('play', {width = player.level.width, level = player.levelnumber + 1, score = player.score})
+                    gStateMachine:change('play', {width = self.width, height = self.height, level = player.levelnumber + 1, score = player.score})
                     return false
                 end
             }
@@ -110,9 +120,9 @@ function GameLevel:key()
             local flag = GameObject {
                 texture = 'flags',
                 x = (TILE_SIZE * (self.width - 2)) + 8,
-                y = TILE_SIZE * 3,
-                width = 16,
-                height = 16,
+                y = floorheight,
+                width = TILE_SIZE,
+                height = TILE_SIZE,
                 frame = 7,
                 collidable = false,
                 consumable = false,

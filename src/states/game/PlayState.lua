@@ -8,16 +8,13 @@
 PlayState = Class{__includes = BaseState}
 
 function PlayState:enter(params)
-    self.levelnumber = params.level
-    self.levelwidth = params.width + (self.levelnumber * 10)
-
-    print('level width ' .. self.levelwidth)
+    print('PlayState:enter width: ' .. params.width .. 'height: ' .. params.height)
 
     self.score = params.score
 
     local levelMaker = LevelMaker()
 
-    self.level = levelMaker:generate(self.levelwidth, 10)
+    self.level = levelMaker:generate(params.width + (params.level * 10), params.height)
     self.tileMap = self.level.tileMap
 
     self.player = Player({
@@ -32,7 +29,7 @@ function PlayState:enter(params)
         },
         map = self.tileMap,
         level = self.level,
-        levelnumber = self.levelnumber,
+        levelnumber = params.level,
         score = self.score
     })
 
@@ -75,13 +72,27 @@ end
 
 function PlayState:render()
     love.graphics.push()
+    --bg
     love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX), 0)
-    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX),
-        gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
-    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 256), 0)
-    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 256),
-        gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    --bg below and upside down
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX), gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    --bg below 2 and upside down
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX), gTextures['backgrounds']:getHeight(), 0, 1, -1)
     
+    --bg to the right
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 256), 0)
+    --bg to the right below upside down
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 256), gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    --bg to the right below 2 upside down
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 256), gTextures['backgrounds']:getHeight(), 0, 1, -1)
+    
+    --bg to the right 2
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 512), 0)
+    --bg to the right 2 below upside down
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 512), gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
+    --bg to the right 2 below 2 upside down
+    love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 512), gTextures['backgrounds']:getHeight(), 0, 1, -1)
+
     -- translate the entire view of the scene to emulate a camera
     love.graphics.translate(-math.floor(self.camX), -math.floor(self.camY))
     
