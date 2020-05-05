@@ -104,47 +104,43 @@ end
 function LevelMaker:block(x)
 
     print('LevelMaker:block: ' .. (self.blockheight - 4) * TILE_SIZE)
-    table.insert(self.objects,
-        -- jump block
-        GameObject {
-            texture = 'jump-blocks',
-            x = (x - 1) * TILE_SIZE,
-            y = (self.blockheight - 4) * TILE_SIZE,
-            width = TILE_SIZE,
-            height = TILE_SIZE,
 
-            -- make it a random variant
-            frame = math.random(#JUMP_BLOCKS),
-            collidable = true,
-            hit = false,
-            solid = true,
+    local block = GameObject {
+        texture = 'jump-blocks',
+        x = (x - 1) * TILE_SIZE,
+        y = (self.blockheight - 4) * TILE_SIZE,
+        width = TILE_SIZE,
+        height = TILE_SIZE,
+        frame = math.random(#JUMP_BLOCKS), -- make it a random variant
+        collidable = true,
+        hit = false,
+        solid = true,
+        nil
+    }
 
-            -- collision function takes itself
-            onCollide = function(obj)
+    block.onCollide = function(obj) -- collision function takes itself
 
-                -- spawn a gem if we haven't already hit the block
-                if not obj.hit then
-
-                    -- chance to spawn gem, not guaranteed
-                    if math.random(3) == 1 then
-                        self:gem(x)
-                    end
-
-                    obj.hit = true
-                end
-
-                gSounds['empty-block']:play()
+        -- spawn a gem if we haven't already hit the block
+        if not obj.hit then
+            if math.random(3) == 1 then -- chance to spawn gem, not guaranteed
+                self:gem(x, block.y )
             end
-        }
-    )
+
+            obj.hit = true
+        end
+
+        gSounds['empty-block']:play()
+    end
+
+    table.insert(self.objects, block)
 end
 
-function LevelMaker:gem(x)
-    print('LevelMaker:gem: ' .. (self.blockheight - 4) * TILE_SIZE)
+function LevelMaker:gem(x, ref)
+    print('LevelMaker:gem: ' .. ref)
     local gem = GameObject {
         texture = 'gems',
         x = (x - 1) * TILE_SIZE,
-        y = (self.blockheight - 4) * TILE_SIZE,
+        y = ref - TILE_SIZE,
         width = TILE_SIZE,
         height = TILE_SIZE,
         frame = math.random(#GEMS),
@@ -161,6 +157,7 @@ function LevelMaker:gem(x)
     }
     
     -- make the gem move up from the block and play a sound
+    print('LevelMaker:gem: ' .. (gem.y - TILE_SIZE))
     Timer.tween(0.1, { [gem] = {y = gem.y - TILE_SIZE} })
     gSounds['powerup-reveal']:play()
 
